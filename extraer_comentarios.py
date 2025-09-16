@@ -18,12 +18,7 @@ SOLO_PRIMER_POST = False
 # LISTA DE URLs A PROCESAR
 URLS_A_PROCESAR = [
     # TikTok Videos
-    "https://www.tiktok.com/@alpinacol/video/7545531175264144658?_r=1&_t=ZS-8zmBxpXxaMB",
-    "https://www.tiktok.com/@alpinacol/video/7545536081081715986?_r=1&_t=ZS-8zmBohiJNWk",
-    "https://www.tiktok.com/@alpinacol/video/7545537780177227015?_r=1&_t=ZS-8zmBj8nzZVS",
-    "https://www.tiktok.com/@alpinacol/video/7545543093358038273?_r=1&_t=ZS-8zmBflgSzMV",
-    "https://www.tiktok.com/@alpinacol/video/7545543148685004039?_r=1&_t=ZS-8zmBbHs0rLe",
-    "https://www.tiktok.com/@alpinacol/video/7545589068067851536?_r=1&_t=ZS-8zmBUxpzRuZ"
+    "https://www.tiktok.com/@alpinacol/video/7545543093358038273?_r=1&_t=ZS-8zmBflgSzMV"
 ]
 
 # INFORMACIÓN DE CAMPAÑA
@@ -244,6 +239,7 @@ def run_extraction():
 
 if __name__ == "__main__":
     run_extraction()
+
 
 
 
