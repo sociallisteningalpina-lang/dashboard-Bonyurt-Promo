@@ -12,7 +12,6 @@ def run_report_generation():
     print("--- INICIANDO GENERACIÓN DE INFORME HTML ---")
     
     try:
-        # Asegúrate de que este nombre coincida con el que genera tu script de extracción
         df = pd.read_excel('Comentarios Campaña.xlsx')
         print("Archivo 'Comentarios Campaña.xlsx' cargado con éxito.")
     except FileNotFoundError:
@@ -25,29 +24,31 @@ def run_report_generation():
     df.dropna(subset=['created_time_colombia', 'comment_text', 'post_url'], inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    # --- Crear etiquetas legibles para cada pauta ---
     unique_posts = df[['post_url', 'platform']].drop_duplicates().reset_index(drop=True)
     post_labels = {}
     for index, row in unique_posts.iterrows():
         post_labels[row['post_url']] = f"Pauta {index + 1} ({row['platform']})"
     df['post_label'] = df['post_url'].map(post_labels)
 
-    # --- Análisis de Sentimientos y Temas ---
     print("Analizando sentimientos y temas...")
     sentiment_analyzer = create_analyzer(task="sentiment", lang="es")
     df['sentimiento'] = df['comment_text'].apply(lambda text: {"POS": "Positivo", "NEG": "Negativo", "NEU": "Neutro"}.get(sentiment_analyzer.predict(str(text)).output, "Neutro"))
     def classify_topic(comment):
         comment_lower = str(comment).lower()
-        if re.search(r'\bia\b|inteligencia artificial|prompts', comment_lower): return 'Críticas a la IA'
-        if re.search(r'artista|diseñador|animador|contratar|pagar', comment_lower): return 'Apoyo a Artistas'
-        if re.search(r'marketing|marca|audiencia|jefazos', comment_lower): return 'Estrategia de Marketing'
-        if re.search(r'bonito|lindo|divino|horrible|feo|calidad|barato', comment_lower): return 'Calidad del Contenido'
-        if re.search(r'alquería|pureza|competencia', comment_lower): return 'Mención a Competencia'
+        if re.search(r'promo|bono|gana|premio|etiqueta|tapa|foto|inscribirse|ganado|mentira|engaño|estafa|sirve el enlace|no deja|no sale nada', comment_lower):
+            return 'Problemas con la Promoción'
+        if re.search(r'caro|costoso|plata|mínimo|precio|poquito|diminuto|vale|cuesta', comment_lower):
+            return 'Críticas al Precio/Cantidad'
+        if re.search(r'loki|lokillo|perros criollos|comediante|trova|freestyle|loco', comment_lower):
+            return 'Menciones al Influencer'
+        if re.search(r'delicioso|rico|encanta|bueno|nutritivo|espeso|azúcar|lactosuero|calidad|sabor', comment_lower):
+            return 'Opiniones del Producto'
+        if re.search(r'marketing|publicidad|anuncio|comercial|propaganda', comment_lower):
+            return 'Marketing y Publicidad'
         return 'Otros'
     df['tema'] = df['comment_text'].apply(classify_topic)
     print("Análisis completado.")
 
-    # --- Preparar datos para el JSON ---
     df_for_json = df[['created_time_colombia', 'comment_text', 'sentimiento', 'tema', 'platform', 'post_url', 'post_label']].copy()
     df_for_json.rename(columns={'created_time_colombia': 'date', 'comment_text': 'comment', 'sentimiento': 'sentiment', 'tema': 'topic'}, inplace=True)
     df_for_json['date'] = df_for_json['date'].dt.strftime('%Y-%m-%dT%H:%M:%S')
@@ -57,8 +58,11 @@ def run_report_generation():
     max_date = df['created_time_colombia'].max().strftime('%Y-%m-%d')
     
     post_filter_options = '<option value="Todas">Ver Todas las Pautas</option>'
+    post_links_html = '<ul>'
     for url, label in post_labels.items():
         post_filter_options += f'<option value="{url}">{label}</option>'
+        post_links_html += f'<li><strong>{label}:</strong> <a href="{url}" target="_blank">Ver Pauta</a></li>'
+    post_links_html += '</ul>'
 
     html_content = f"""
     <!DOCTYPE html>
@@ -68,7 +72,6 @@ def run_report_generation():
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Panel Interactivo de Campañas</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-        <script src="https://unpkg.com/wordcloud@2.6.0/src/wordcloud2.js"></script>
         <style>
             * {{ margin: 0; padding: 0; box-sizing: border-box; }}
             body {{ font-family: 'Arial', sans-serif; background: #f4f7f6; }}
@@ -101,8 +104,6 @@ def run_report_generation():
             .charts-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }}
             .chart-container {{ position: relative; height: 400px; }}
             .chart-container.full-width {{ grid-column: 1 / -1; }}
-            .wordcloud-title {{ text-align: center; margin-bottom: 10px; font-size: 1.2em; }}
-            #negativeWordCloud, #positiveWordCloud {{ width: 100%; height: 100%; }}
             .comment-item {{ margin-bottom: 10px; padding: 15px; border-radius: 8px; border-left: 5px solid; word-wrap: break-word; }}
             .comment-positive {{ border-left-color: #28a745; background: #f0fff4; }} .comment-negative {{ border-left-color: #dc3545; background: #fff5f5; }} .comment-neutral {{ border-left-color: #ffc107; background: #fffbeb; }}
             .comment-meta {{ margin-bottom: 8px; font-size: 0.9em; display: flex; justify-content: space-between; align-items: center; }}
@@ -146,14 +147,6 @@ def run_report_generation():
                 </div>
             </section>
             
-            <div class="card charts-section">
-                <h2 class="section-title">☁️ Nubes de Palabras Dinámicas</h2>
-                <div class="charts-grid">
-                    <div class="chart-container"><h3 class="wordcloud-title negative-text">Términos Negativos</h3><canvas id="negativeWordCloud"></canvas></div>
-                    <div class="chart-container"><h3 class="wordcloud-title positive-text">Términos Positivos</h3><canvas id="positiveWordCloud"></canvas></div>
-                </div>
-            </div>
-
             <div class="card comments-section">
                 <h2 class="section-title">💬 Comentarios Filtrados</h2>
                 <div id="comments-list"></div>
@@ -200,7 +193,7 @@ def run_report_generation():
                     if (postLinksCurrentPage > totalPages) postLinksCurrentPage = 1;
 
                     const startIndex = (postLinksCurrentPage - 1) * POST_LINKS_PER_PAGE;
-                    const paginatedPosts = postsToShow.slice(startIndex, endIndex);
+                    const paginatedPosts = postsToShow.slice(startIndex, startIndex + POST_LINKS_PER_PAGE);
 
                     let tableHTML = '<table><tr><th>Pauta</th><th>Enlace</th></tr>';
                     paginatedPosts.forEach(p => {{
@@ -225,34 +218,7 @@ def run_report_generation():
                         }});
                     }}
                 }};
-
-                const spanishStopwords = new Set(['de', 'la', 'que', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un', 'para', 'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'más', 'pero', 'sus', 'le', 'ya', 'o', 'este', 'ha', 'me', 'si', 'sin', 'sobre', 'es', 'porque', 'qué', 'cuando', 'muy', 'desde', 'mi', 'eso', 'esto', 'son', 'mis', 'ese', 'yo', 'e', 'hasta', 'puedo', 'esa', 'les', 'he', 'sido', 'han', 'hay', 'ser', 'delo', 'todo', 'todos']);
-                const processTextForWordCloud = (text) => {{
-                    const wordCounts = {{}};
-                    const words = text.toLowerCase().match(/[a-záéíóúñ]+/g) || [];
-                    words.forEach(word => {{
-                        if (!spanishStopwords.has(word) && word.length > 2) {{
-                            wordCounts[word] = (wordCounts[word] || 0) + 1;
-                        }}
-                    }});
-                    return Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 100);
-                }};
-
-                const updateWordClouds = (data) => {{
-                    if (typeof WordCloud !== 'function') {{ console.error("WordCloud library not loaded yet."); return; }}
-                    let positiveText = data.filter(d => d.sentiment === 'Positivo').map(d => d.comment).join(' ');
-                    let negativeText = data.filter(d => d.sentiment === 'Negativo').map(d => d.comment).join(' ');
-                    const positiveWordList = processTextForWordCloud(positiveText);
-                    const negativeWordList = processTextForWordCloud(negativeText);
-                    const options = {{ list: [], gridSize: 8, weightFactor: 4, fontFamily: 'Arial, sans-serif', minSize: 10, backgroundColor: '#ffffff', drawOutOfBound: false }};
-                    options.list = negativeWordList.length > 0 ? negativeWordList : [['Sin datos', 1]];
-                    options.color = '#dc3545';
-                    WordCloud(document.getElementById('negativeWordCloud'), options);
-                    options.list = positiveWordList.length > 0 ? positiveWordList : [['Sin datos', 1]];
-                    options.color = '#28a745';
-                    WordCloud(document.getElementById('positiveWordCloud'), options);
-                }};
-
+                
                 const updateDashboard = () => {{
                     const startFilter = startDateInput.value + 'T' + startTimeInput.value + ':00';
                     const endFilter = endDateInput.value + 'T' + endTimeInput.value + ':59';
@@ -267,7 +233,6 @@ def run_report_generation():
                     updateStats(filteredData);
                     updateCharts(allData, filteredData);
                     updateCommentsList(filteredData);
-                    updateWordClouds(filteredData);
                 }};
                 
                 const updateStats = (data) => {{ const total = data.length; const sentiments = data.reduce((acc, curr) => {{ acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1; return acc; }}, {{}}); const pos = sentiments['Positivo'] || 0; const neg = sentiments['Negativo'] || 0; const neu = sentiments['Neutro'] || 0; document.getElementById('stats-grid').innerHTML = `<div class="stat-card total"><div class="stat-number total-text">${{total}}</div><div>Total Comentarios</div></div><div class="stat-card positive"><div class="stat-number positive-text">${{pos}}</div><div>Positivos (${{(total > 0 ? (pos / total * 100) : 0).toFixed(1)}}%)</div></div><div class="stat-card negative"><div class="stat-number negative-text">${{neg}}</div><div>Negativos (${{(total > 0 ? (neg / total * 100) : 0).toFixed(1)}}%)</div></div><div class="stat-card neutral"><div class="stat-number neutral-text">${{neu}}</div><div>Neutros (${{(total > 0 ? (neu / total * 100) : 0).toFixed(1)}}%)</div></div>`; }};
