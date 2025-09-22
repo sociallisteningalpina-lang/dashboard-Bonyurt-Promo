@@ -18,6 +18,9 @@ SOLO_PRIMER_POST = False
 # LISTA DE URLs A PROCESAR
 URLS_A_PROCESAR = [
     # Instagram Posts
+    "https://www.instagram.com/p/DOoQek7AMC9/#advertiser",
+    "https://www.instagram.com/p/DOrPYdOgC8z/#advertiser",
+    "https://www.instagram.com/p/DOoRIzaADj1/#advertiser",
     "https://www.instagram.com/p/DM_Fcv3A_Ym/#advertiser",
     "https://www.instagram.com/p/DM_FWE8AdHo/#advertiser",
     "https://www.instagram.com/p/DM8rSlNAWwb/#advertiser",
@@ -42,6 +45,9 @@ URLS_A_PROCESAR = [
     "https://www.instagram.com/p/DNnwsoQgcVF/#advertiser",
     
     # Facebook Posts
+    "https://www.facebook.com/100064672685926/posts/1197806252385120/?dco_ad_token=Aaq2PgdCKvSlf9LTI-ygC2criR1JoM5euYcQOQWzDn2qilw03LjOBKvyOvw_aws6oF6pMCmFilHysvc2&dco_ad_id=120234495171800295",
+    "https://www.facebook.com/100064672685926/posts/1197806389051773/?dco_ad_token=Aao7_zaGni55KhDEqlGRYf90IV0hYGkErS1OOy_A1tpQNJZgLmc-sgQ9mHvSrnLNsyTElRMjBjeOcLHX&dco_ad_id=120234494857770295",
+    "https://www.facebook.com/100064672685926/posts/1196785815820497/?dco_ad_token=AaqC5DBmH6YqfxvTooueKhxBJH5lfCsV36C47uO4DAjizxgNQo4plhubgfpzeGs5z09q_33n3As5j28Y&dco_ad_id=120234494551360295",
     "https://www.facebook.com/100064672685926/posts/1170398145125931/?dco_ad_token=Aaqd93VZDxxTsTiHXggZLy7LWvlNV1DbZBaTFkbBPh8dNg78qhVQk-zZbrlhhupVq66k9m5YgC1Fmk4P&dco_ad_id=120228919741640701",
     "https://www.facebook.com/100064672685926/posts/1163143839184695/?dco_ad_token=Aap7vHiGm82HWrjGhWmc8xAw_J98sN3OiU59j_wFvJPSDxN4vEgdcEw-y-WCEdArHenBq3CWZUNQym01&dco_ad_id=120232299228210295",
     "https://www.facebook.com/100064672685926/posts/1162323169266762/?dco_ad_token=AaooMUXLR-e7-QfJxKoWQVNr-NEoidsMF3fWCIK4u1kxp8cnDwO6GyZAssGPanBN1ptFiTvun_1u4nYf&dco_ad_id=120232299228190295",
@@ -290,6 +296,7 @@ def run_extraction():
 
 if __name__ == "__main__":
     run_extraction()
+
 
 
 
