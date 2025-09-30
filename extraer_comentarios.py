@@ -16,7 +16,7 @@ APIFY_TOKEN = os.environ.get("APIFY_TOKEN")
 SOLO_PRIMER_POST = False
 
 # LISTA DE URLs A PROCESAR
-URLS_ACTUALIZADAS = [
+URLS_A_PROCESAR = [
     # Instagram (25)
     "https://www.instagram.com/p/DM_Fcv3A_Ym/",
     "https://www.instagram.com/p/DM_FWE8AdHo/",
@@ -297,6 +297,7 @@ def run_extraction():
 
 if __name__ == "__main__":
     run_extraction()
+
 
 
 
