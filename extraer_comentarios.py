@@ -75,7 +75,8 @@ URLS_ACTUALIZADAS = [
     "https://www.tiktok.com/@alpinacol/video/7545537780177227015",
     "https://www.tiktok.com/@alpinacol/video/7545543093358038273",
     "https://www.tiktok.com/@alpinacol/video/7545543148685004039",
-    "https://www.tiktok.com/@alpinacol/video/7545589068067851536"
+    "https://www.tiktok.com/@alpinacol/video/7545589068067851536",
+    "https://www.tiktok.com/@alpinacol/video/7555515092641565968"
 ]
 
 # INFORMACIÓN DE CAMPAÑA
@@ -296,6 +297,7 @@ def run_extraction():
 
 if __name__ == "__main__":
     run_extraction()
+
 
 
 
